@@ -4,10 +4,10 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import psycopg2
 
-database_url =  "postgresql://postgres:Dheeraj@localhost/shipping"
+database_url =  ""
 
 #creating SQLAlchemy engine
-engine = create_engine(database_url)
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

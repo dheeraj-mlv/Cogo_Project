@@ -4,6 +4,7 @@ from typing import Optional
 class Shipment_detailsBase(BaseModel):
     origin: str
     destination: str
+<<<<<<< HEAD
     size: Optional[str]=None
     type: Optional[str]=None
     commodity: Optional[str]=None
@@ -11,6 +12,13 @@ class Shipment_detailsBase(BaseModel):
         orm_mode = True
 
 
+=======
+    size: str
+    type: str
+    commodity: str
+    count : int
+    weight : str
+>>>>>>> f7189929ae0b55d699a481d0f10008aef53014ea
 
 class Shipment_detailsCreate(Shipment_detailsBase):
     pass
