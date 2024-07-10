@@ -52,20 +52,53 @@ def read_shipment(shipment_id: int, db: Session = Depends(get_db)):
 
 @app.get("/shipments/", response_model=List[schemas.Shipment])
 def get_all_shipments(db: Session = Depends(get_db)):
-    db_shipments = db.query(models.ShipmentDetails).all()
+    db_shipments = db.query(models.Shipment_details).all()
     if not db_shipments:
         raise HTTPException(status_code=404, detail="No Shipments found")
     return db_shipments
 
-@app.put("/shipments/{shipment_id}", response_model=schemas.Shipment)
-def update_shipment(shipment_id: int, shipment: schemas.Shipment_detailsUpdate, db: Session = Depends(get_db)):
-    db_shipment = db.query(models.Shipment_details).filter(schemas.Shipment_details.id == shipment_id).first()
+@app.put("/shipmentsOptionalUpdate/{shipment_id}",response_model=schemas.Shipment)
+def optinal_update(shipment_id:int,shipment:schemas.Shipment_detailsUpdateOptional,db: Session = Depends(get_db)):
+    db_shipment = db.query(models.Shipment_details).filter(models.Shipment_details.id == shipment_id).first()
     if db_shipment is None:
         raise HTTPException(status_code=404, detail="Shipment not found")
-    if(shipment.origin==shipment.destination):
-        return "INVALID REQUEST ORIGIN AND DESTINATION CAN NOT BE SAME"
-    if(shipment.count<=0):
-        return "INVALID REQUEST COUNT CAN NOT BE NEGATIVE"
+    
+    # Check if both origin and destination are present in the update request
+    if 'origin' in shipment.dict(exclude_unset=True) and 'destination' in shipment.dict(exclude_unset=True):
+        if shipment.origin == shipment.destination:
+            raise HTTPException(status_code=400, detail="INVALID REQUEST ORIGIN AND DESTINATION CANNOT BE THE SAME")
+    
+    # Check if count is present and valid
+    if 'count' in shipment.dict(exclude_unset=True) and shipment.count <= 0:
+        raise HTTPException(status_code=400, detail="INVALID REQUEST COUNT CANNOT BE NEGATIVE")
+    
+    for field, value in shipment.dict(exclude_unset=True).items():
+        setattr(db_shipment, field, value)
+    
+    db.commit()
+    db.refresh(db_shipment)
+    return db_shipment
+
+
+
+
+
+@app.put("/shipments/{shipment_id}", response_model=schemas.Shipment)
+def update_shipment(shipment_id: int, shipment: schemas.Shipment_detailsUpdate, db: Session = Depends(get_db)):
+    db_shipment = db.query(models.Shipment_details).filter(models.Shipment_details.id == shipment_id).first()
+    if db_shipment is None:
+        raise HTTPException(status_code=404, detail="Shipment not found")
+    
+
+    # Check if both origin and destination are present in the update request
+    
+    if shipment.origin == shipment.destination:
+        raise HTTPException(status_code=400, detail="INVALID REQUEST ORIGIN AND DESTINATION CANNOT BE THE SAME")
+
+    if shipment.count <= 0:
+        raise HTTPException(status_code=400, detail="INVALID REQUEST COUNT CANNOT BE NEGATIVE")
+    
+
     for field, value in shipment.dict(exclude_unset=True).items():
         setattr(db_shipment, field, value)
     db.commit()
