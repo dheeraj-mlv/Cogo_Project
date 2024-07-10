@@ -25,13 +25,6 @@ def get_db():
            db.close()
 
 
-# @app.post("/shipments/", response_model=schemas.Shipment)
-# def create_shipment(shipment: schemas.Shipment_detailsCreate, db: Session = Depends(get_db)):
-#     db_shipment = models.Shipment_details(**shipment.dict())
-#     db.add(db_shipment)
-#     db.commit()
-#     db.refresh(db_shipment)
-#     return db_shipment
 
 @app.post("/shipments/", response_model=schemas.Shipment)
 def create_shipment(shipment: schemas.Shipment_detailsCreate, db: Session = Depends(get_db)):
@@ -58,11 +51,11 @@ def read_shipment(shipment_id: int, db: Session = Depends(get_db)):
     return db_shipment
 
 @app.get("/shipments/", response_model=List[schemas.Shipment])
-def get_searches(db: Session = Depends(get_db) , skip : int =0 , limit : int = 100):
-    db_searches = db.query(models.Shipment_details).offset(skip).limit(limit).all()
-    if not db_searches:
+def get_all_shipments(db: Session = Depends(get_db)):
+    db_shipments = db.query(models.ShipmentDetails).all()
+    if not db_shipments:
         raise HTTPException(status_code=404, detail="No Shipments found")
-    return db_searches
+    return db_shipments
 
 @app.put("/shipments/{shipment_id}", response_model=schemas.Shipment)
 def update_shipment(shipment_id: int, shipment: schemas.Shipment_detailsUpdate, db: Session = Depends(get_db)):
