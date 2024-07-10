@@ -8,7 +8,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3001"],  # Replace with your frontend URL
+    allow_origins=["*"],  # Replace with your frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -34,7 +34,10 @@ def get_db():
 
 @app.post("/shipments/", response_model=schemas.Shipment)
 def create_shipment(shipment: schemas.Shipment_detailsCreate, db: Session = Depends(get_db)):
+    # add a check for start and end to not be same 
     print(f"Received shipment data: {shipment.dict()}")
+    if(shipment.origin==shipment.destination):
+        return "INVALID REQUEST ORIGIN AND DESTINATION CAN NOT BE SAME"
     try:
         db_shipment = models.Shipment_details(**shipment.dict())
         db.add(db_shipment)
