@@ -62,6 +62,10 @@ def update_shipment(shipment_id: int, shipment: schemas.Shipment_detailsUpdate, 
     db_shipment = db.query(models.Shipment_details).filter(schemas.Shipment_details.id == shipment_id).first()
     if db_shipment is None:
         raise HTTPException(status_code=404, detail="Shipment not found")
+    if(shipment.origin==shipment.destination):
+        return "INVALID REQUEST ORIGIN AND DESTINATION CAN NOT BE SAME"
+    if(shipment.count<=0):
+        return "INVALID REQUEST COUNT CAN NOT BE NEGATIVE"
     for field, value in shipment.dict(exclude_unset=True).items():
         setattr(db_shipment, field, value)
     db.commit()
